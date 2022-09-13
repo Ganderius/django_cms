@@ -22,10 +22,84 @@ def index(request):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
+class FixSth(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request):
+        whyus_block = WhyUs.objects.get(id=2)
+        case_block = Cases.objects.get(id=1)
+        industry = Industries.objects.get(id=1)
+        companies = Companies.objects.get(id=1)
+        client_block = Clients.objects.get(id=1)
+        faq_block = FAQ.objects.get(id=1)
+        blog_block = Blog.objects.get(id=1)
+        service = Services.objects.get(id=1)
+        znak = 1
+        for i in whyus_block.block.all():
+            i.pagination = znak
+            znak += 1
+            i.save()
+        znak = 1
+        for i in case_block.block.all():
+            i.pagination = znak
+            znak += 1
+            i.save()
+        znak = 1
+        for i in client_block.block.all():
+            i.pagination = znak
+            znak += 1
+            i.save()
+        znak = 1
+        for i in faq_block.block.all():
+            i.pagination = znak
+            znak += 1
+            i.save()
+        znak = 1
+        for i in blog_block.block.all():
+            i.pagination = znak
+            znak += 1
+            i.save()
+        znak = 1
+        for i in companies.block.all():
+            i.pagination = znak
+            znak += 1
+            i.save()
+        znak = 1
+        kost = 1
+        for i in industry.type.all():
+            i.pagination = znak
+            znak += 1
+            i.save()
+            for j in i.block.all():
+                j.pagination = kost
+                kost += 1
+            j.save()
+            kost = 1
+        znak = 1
+        for i in service.type.all():
+            i.pagination = znak
+            znak += 1
+            i.save()
+            for j in i.block.all():
+                j.pagination = kost
+                kost += 1
+            j.save()
+            kost = 1
+
+        data = {
+            'message': 'Complete'
+        }
+
+        return JsonResponse(data)
+
+
+
+
+@method_decorator(csrf_exempt, name='dispatch')
 class ViewImage(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         images = Images.objects.all()
+
 
         image_data = []
         for i in images:
@@ -40,9 +114,9 @@ class ViewImage(APIView):
 
         return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        image = Images.objects.get(id=put_body.get('id'))
+    def delete(self, request, id):
+        put_body = id
+        image = Images.objects.get(id=put_body)
         image.delete()
 
         data = {
@@ -65,7 +139,9 @@ class PostImage(APIView):
         image_new = Images.objects.create(**image_data)
 
         data = {
-            'message': 'New image has been created'
+            'id': str(image_new.id),
+            'message': 'New image has been created',
+            'url': image_new.image.url,
         }
 
         return JsonResponse(data)
@@ -194,12 +270,11 @@ class ViewMenu(View):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class ViewMenuServiceById(View):
+class ViewMenuServiceById(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        put_body = json.loads(request.body)
-        service_id = put_body.get('id')
+    def get(self, request, id):
+        service_id = id
         menu = Menu.objects.get(id=1)
         service = menu.service.get(id=service_id)
         link_kost = 0
@@ -276,9 +351,9 @@ class ViewMenuServiceById(View):
 
         return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        service_id = put_body.get('id')
+    def delete(self, request, id):
+        put_body = id
+        service_id = put_body
         menu = Menu.objects.get(id=1)
         service = menu.service.get(id=service_id)
         service.delete()
@@ -308,6 +383,7 @@ class PostMenuService(View):
             i.delete()
 
         data = {
+            'id': str(service.id),
             'message': 'New section has been created'
         }
 
@@ -315,13 +391,13 @@ class PostMenuService(View):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class ViewMenuSection(View):
+class ViewMenuSection(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
+    def get(self, request, id):
         put_body = json.loads(request.body)
         service_id = put_body.get('service id')
-        section_id = put_body.get('id')
+        section_id = id
         menu = Menu.objects.get(id=1)
         service = menu.service.get(id=service_id)
         section = service.section.get(id=section_id)
@@ -371,11 +447,11 @@ class ViewMenuSection(View):
 
         return JsonResponse(data)
 
-    def delete(self, request):
+    def delete(self, request, id):
         put_body = json.loads(request.body)
         menu = Menu.objects.get(id=1)
         service = menu.service.get(id=put_body.get("service id"))
-        section = service.section.get(id=put_body.get("id"))
+        section = id
         section.delete()
 
         data = {
@@ -405,6 +481,7 @@ class PostMenuSection(View):
             i.delete()
 
         data = {
+            'id': section.id,
             'message': 'New section has been created'
         }
 
@@ -412,15 +489,15 @@ class PostMenuSection(View):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class ViewMenuSectionLink(View):
+class ViewMenuSectionLink(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
+    def get(self, request, id):
         put_body = json.loads(request.body)
         menu = Menu.objects.get(id=1)
         service = menu.service.get(id=put_body.get("service id"))
         section = service.section.get(id=put_body.get("section id"))
-        link = section.link.get(id=put_body.get("id"))
+        link = id
 
         data = {
             'id': link.id,
@@ -450,12 +527,12 @@ class ViewMenuSectionLink(View):
 
         return JsonResponse(data)
 
-    def delete(self, request):
+    def delete(self, request, id):
         put_body = json.loads(request.body)
         menu = Menu.objects.get(id=1)
         service = menu.service.get(id=put_body.get("service id"))
         section = service.section.get(id=put_body.get("section id"))
-        link = section.link.get(id=put_body.get("id"))
+        link = id
         link.delete()
 
         data = {
@@ -484,6 +561,7 @@ class PostMenuSectionLink(View):
         link = section.link.create(**new_link)
 
         data = {
+            'id': str(link.id),
             'message': 'New link has been created'
         }
 
@@ -502,6 +580,7 @@ class ViewWhyUs(View):
                 'id': i.id,
                 'title': i.title,
                 'description': i.description,
+                'pagination': i.pagination,
             })
 
         data = {
@@ -527,17 +606,17 @@ class ViewWhyUs(View):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class ViewWhyUsBlockById(View):
+class ViewWhyUsBlockById(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def get(self, request, id):
+        block_id = id
         block = WhyUsBlock.objects.get(id=block_id)
         data = {
             'id': block.id,
             'title': block.title,
             'description': block.description,
+            'pagination': block.pagination,
         }
 
         return JsonResponse(data)
@@ -556,9 +635,8 @@ class ViewWhyUsBlockById(View):
 
         return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def delete(self, request, id):
+        block_id = id
         block = WhyUsBlock.objects.get(id=block_id)
         block.delete()
 
@@ -576,13 +654,19 @@ class PostWhyUsBlock(View):
     def post(self, request):
         put_body = json.loads(request.body)
         why_us = WhyUs.objects.get(id=2)
+        kost = 0
+        for i in why_us.block.all():
+            if kost < i.pagination:
+                kost = i.pagination
         block_data = {
             'title': put_body.get('title'),
             'description': put_body.get('description'),
+            'pagination': kost,
         }
 
         block_new = why_us.block.create(**block_data)
         data = {
+            'id': str(block_new.id),
             'message': 'New block has been created'
         }
 
@@ -602,8 +686,10 @@ class ViewCase(View):
                 'title': i.title,
                 'description': i.description,
                 'previewimage': i.image.url,
+                'background image': i.backgroundImage.url,
                 'image id': i.image.public_id,
                 'content': i.content,
+                'pagination': i.pagination,
             })
 
         data = {
@@ -615,20 +701,21 @@ class ViewCase(View):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class ViewCaseBlockById(View):
+class ViewCaseBlockById(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def get(self, request, id):
+        block_id = id
         block = CaseBlock.objects.get(id=block_id)
         data = {
             'id': block.id,
             'title': block.title,
             'description': block.description,
             'previewimage': block.image.url,
+            'background image': block.backgroundImage.url,
             'image id': block.image.public_id,
             'content': block.content,
+            'pagination': block.pagination,
         }
 
         return JsonResponse(data)
@@ -640,6 +727,8 @@ class ViewCaseBlockById(View):
             print(i.image.public_id)
             if i.image.public_id == put_body.get('image'):
                 img = i.image
+            if i.image.public_id == put_body.get('background image'):
+                back_img = i.image
         # img_extension = os.path.split(img.name)[1]
         # save_path = "media/image/"
         # if not os.path.exists(save_path):
@@ -651,6 +740,7 @@ class ViewCaseBlockById(View):
         #         f.write(chunk)
         block = CaseBlock.objects.get(id=put_body.get('id'))
         block.image = img
+        block.backgroundImage = back_img
         block.title = put_body.get('title')
         block.description = put_body.get('description')
         block.content = put_body.get('content')
@@ -692,9 +782,8 @@ class ViewCaseBlockById(View):
     #
     #     return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def delete(self, request, id):
+        block_id = id
         block = CaseBlock.objects.get(id=block_id)
         block.delete()
 
@@ -711,20 +800,31 @@ class PostCaseBlock(View):
 
     def post(self, request):
         put_body = json.loads(request.body)
+        cases = Cases.objects.all(id=1)
         images = Images.objects.all()
         for i in images:
             print(i.image.public_id)
             if i.image.public_id == put_body.get('image'):
                 img = i.image
+            if i.image.public_id == put_body.get('background image'):
+                back_img = i.image
+        kost = 0
+        for i in cases.block.all():
+            if kost < i.pagination:
+                kost = i.pagination
+
         block_data = {
             'title': put_body.get('title'),
             'description': put_body.get('description'),
             'image': img,
-            'content': put_body.get('content')
+            'backgroundImage': back_img,
+            'content': put_body.get('content'),
+            'pagination': kost,
         }
 
         block_new = CaseBlock.objects.create(**block_data)
         data = {
+            'id': str(block_new.id),
             'message': 'New block has been created'
         }
 
@@ -745,6 +845,7 @@ class ViewCompany(View):
                 'previewimage': i.image.url,
                 'image id': i.image.public_id,
                 'url': i.url,
+                'pagination': i.pagination,
             })
 
         data = {
@@ -759,9 +860,8 @@ class ViewCompany(View):
 class ViewCompanyBlockById(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def get(self, request, id):
+        block_id = id
         block = CompaniesBlock.objects.get(id=block_id)
         data = {
             'id': block.id,
@@ -769,6 +869,7 @@ class ViewCompanyBlockById(APIView):
             'previewimage': block.image.url,
             'image id': block.image.public_id,
             'url': block.url,
+            'pagination': block.pagination,
         }
 
         return JsonResponse(data)
@@ -793,9 +894,8 @@ class ViewCompanyBlockById(APIView):
 
         return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def delete(self, request, id):
+        block_id = id
         block = CompaniesBlock.objects.get(id=block_id)
         block.delete()
 
@@ -813,19 +913,25 @@ class PostCompanyBlock(APIView):
     def post(self, request):
         put_body = json.loads(request.body)
         images = Images.objects.all()
+        companies = Companies.objects.all(id=1)
         for i in images:
             print(i.image.public_id)
             if i.image.public_id == put_body.get('image'):
                 img = i.image
-
+        kost = 0
+        for i in companies.block.all():
+            if kost < i.pagination:
+                kost = i.pagination
         block_data = {
             'title': put_body.get('title'),
             'image': img,
             'url': put_body.get('url'),
+            'pagination': kost,
         }
 
         block_new = CompaniesBlock.objects.create(**block_data)
         data = {
+            'id': str(block_new.id),
             'message': 'New block has been created'
         }
 
@@ -847,6 +953,7 @@ class ViewClients(View):
                 'description': i.description,
                 'previewimage': i.image.url,
                 'image id': i.image.public_id,
+                'pagination': i.pagination,
             })
 
         data = {
@@ -874,9 +981,8 @@ class ViewClients(View):
 class ViewClientBlockById(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def get(self, request, id):
+        block_id = id
         block = ClientBlock.objects.get(id=block_id)
         data = {
             'id': block.id,
@@ -885,6 +991,7 @@ class ViewClientBlockById(APIView):
             'description': block.description,
             'previewimage': block.image.url,
             'image id': block.image.public_id,
+            'pagination': block.pagination,
         }
 
         return JsonResponse(data)
@@ -910,9 +1017,8 @@ class ViewClientBlockById(APIView):
 
         return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def delete(self, request, id):
+        block_id = id
         block = ClientBlock.objects.get(id=block_id)
         block.delete()
 
@@ -930,20 +1036,26 @@ class PostClientBlock(APIView):
     def post(self, request):
         put_body = json.loads(request.body)
         images = Images.objects.all()
+        clients = Clients.objects.all()
         for i in images:
             print(i.image.public_id)
             if i.image.public_id == put_body.get('image'):
                 img = i.image
-
+        kost = 0
+        for i in clients.block.all():
+            if kost < i.pagination:
+                kost = i.pagination
         block_data = {
             'full_name': put_body.get('full name'),
             'title': put_body.get('title'),
             'description': put_body.get('description'),
-            'image': img
+            'image': img,
+            'pagination': kost,
         }
 
         block_new = ClientBlock.objects.create(**block_data)
         data = {
+            'id': str(block_new.id),
             'message': 'New block has been created'
         }
 
@@ -962,6 +1074,7 @@ class ViewFAQ(View):
                 'id': i.id,
                 'title': i.title,
                 'description': i.description,
+                'pagination': i.pagination,
             })
 
         data = {
@@ -973,17 +1086,17 @@ class ViewFAQ(View):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class ViewFAQBlockById(View):
+class ViewFAQBlockById(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def get(self, request, id):
+        block_id = id
         block = FAQBlock.objects.get(id=block_id)
         data = {
             'id': block.id,
             'title': block.title,
             'description': block.description,
+            'pagination': block.pagination,
         }
 
         return JsonResponse(data)
@@ -1003,9 +1116,8 @@ class ViewFAQBlockById(View):
 
         return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def delete(self, request, id):
+        block_id = id
         block = FAQBlock.objects.get(id=block_id)
         block.delete()
 
@@ -1022,14 +1134,20 @@ class PostFAQBlock(View):
 
     def post(self, request):
         put_body = json.loads(request.body)
-
+        faqs = FAQ.objects.all(id=1)
+        kost = 0
+        for i in faqs.block.all():
+            if kost < i.pagination:
+                kost = i.pagination
         block_data = {
             'title': put_body.get('title'),
             'description': put_body.get('description'),
+            'pagination': kost,
         }
 
         block_new = FAQBlock.objects.create(**block_data)
         data = {
+            'id': str(block_new.id),
             'message': 'New block has been created'
         }
 
@@ -1050,8 +1168,10 @@ class ViewBlog(View):
                     'name': j.title,
                     'description': j.description,
                     'previewimage': j.image.url,
+                    'background image': j.backgroundImage.url,
                     'image id': j.image.public_id,
                     'content': j.content,
+                    'pagination': j.pagination,
                 })
             data = {
                 'name': i.name,
@@ -1065,17 +1185,18 @@ class ViewBlog(View):
 class ViewBlogBlockById(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def get(self, request, id):
+        block_id = id
         block = BlogBlock.objects.get(id=block_id)
         data = {
             'id': block.id,
             'title': block.title,
             'description': block.description,
             'previewimage': block.image.url,
+            'background image': block.backgroundImage.url,
             'image id': block.image.public_id,
             'content': block.content,
+            'pagination': block.pagination,
         }
 
         return JsonResponse(data)
@@ -1087,11 +1208,14 @@ class ViewBlogBlockById(APIView):
             print(i.image.public_id)
             if i.image.public_id == put_body.get('image'):
                 img = i.image
+            if i.image.public_id == put_body.get('background image'):
+                back_img = i.image
         block_id = put_body.get('id')
         block = BlogBlock.objects.get(id=block_id)
         block.title = put_body.get('title')
         block.description = put_body.get('description')
         block.image = img
+        block.backgroundImage = back_img
         block.content = put_body.get('content')
         block.save()
 
@@ -1101,9 +1225,8 @@ class ViewBlogBlockById(APIView):
 
         return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def delete(self, request, id):
+        block_id = id
         block = BlogBlock.objects.get(id=block_id)
         block.delete()
 
@@ -1121,20 +1244,30 @@ class PostBlogBlock(APIView):
     def post(self, request):
         put_body = json.loads(request.body)
         images = Images.objects.all()
+        blogs = Blog.objects.all()
+        kost = 0
+        for i in blogs.block.all():
+            if kost < i.pagination:
+                kost = i.pagination
         for i in images:
             print(i.image.public_id)
             if i.image.public_id == put_body.get('image'):
                 img = i.image
+            if i.image.public_id == put_body.get('background image'):
+                back_img = i.image
 
         block_data = {
             'title': put_body.get('title'),
             'description': put_body.get('description'),
             'image': img,
+            'backgroundImage': back_img,
             'content': put_body.get('content'),
+            'pagination': kost,
         }
 
         block_new = BlogBlock.objects.create(**block_data)
         data = {
+            'id': str(block_new.id),
             'message': 'New block has been created'
         }
 
@@ -1158,6 +1291,7 @@ class ViewIndustry(View):
                     'previewimage': j.image.url,
                     'image id': j.image.public_id,
                     'content': j.content,
+                    'pagination': j.pagination,
                 })
                 block_kost += 1
             block_kost *= -1
@@ -1165,6 +1299,7 @@ class ViewIndustry(View):
                 'id': i.id,
                 'name': i.name,
                 'blocks': blocks_data[block_kost:],
+                'pagination': i.pagination,
             })
             block_kost = 0
 
@@ -1180,9 +1315,8 @@ class ViewIndustry(View):
 class ViewIndustryTypeById(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        put_body = json.loads(request.body)
-        type_id = put_body.get('id')
+    def get(self, request, id):
+        type_id = id
         industry_type = IndustryType.objects.get(id=type_id)
         blocks_data = []
         for i in industry_type.block.all():
@@ -1192,11 +1326,13 @@ class ViewIndustryTypeById(APIView):
                 'previewimage': i.image.url,
                 'image id': i.image.public_id,
                 'content': i.content,
+                'pagination': i.pagination,
             })
         data = {
             'id': industry_type.id,
             'name': industry_type.name,
             'blocks': blocks_data,
+            'pagination': industry_type.pagination,
         }
 
         return JsonResponse(data)
@@ -1215,9 +1351,8 @@ class ViewIndustryTypeById(APIView):
 
         return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        type_id = put_body.get('id')
+    def delete(self, request, id):
+        type_id = id
         industry_type = IndustryType.objects.get(id=type_id)
         industry_type.delete()
 
@@ -1234,14 +1369,20 @@ class PostIndustryType(View):
 
     def post(self, request):
         put_body = json.loads(request.body)
-
+        industrys = Industries.objects.all(id=1)
+        kost = 0
+        for i in industrys.block.all():
+            if kost < i.pagination:
+                kost = i.pagination
         block_data = {
-            'name': put_body.get('name')
+            'name': put_body.get('name'),
+            'pagination': kost,
         }
 
         block_new = IndustryType.objects.create(**block_data)
 
         data = {
+            'id': str(block_new.id),
             'message': 'New type has been created'
         }
 
@@ -1252,9 +1393,8 @@ class PostIndustryType(View):
 class ViewIndustryTypeBlockById(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def get(self, request, id):
+        block_id = id
         block = IndustriesBlock.objects.get(id=block_id)
         data = {
             'id': block.id,
@@ -1262,6 +1402,7 @@ class ViewIndustryTypeBlockById(APIView):
             'previewimage': block.image.url,
             'image id': block.image.public_id,
             'content': block.content,
+            'pagination': block.pagination,
         }
 
         return JsonResponse(data)
@@ -1286,9 +1427,8 @@ class ViewIndustryTypeBlockById(APIView):
 
         return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def delete(self, request, id):
+        block_id = id
         block = IndustriesBlock.objects.get(id=block_id)
         block.delete()
 
@@ -1306,6 +1446,12 @@ class PostIndustryTypeBlock(APIView):
     def post(self, request):
         put_body = json.loads(request.body)
         images = Images.objects.all()
+        industrys = Industries.objects.all(id=1)
+        kost = 0
+        for i in industrys.type.all():
+            for j in i.block.all():
+                if kost < j.pagination:
+                    kost = j.pagination
         for i in images:
             print(i.image.public_id)
             if i.image.public_id == put_body.get('image'):
@@ -1316,10 +1462,12 @@ class PostIndustryTypeBlock(APIView):
             'industry_type': type,
             'image': img,
             'content': put_body.get('content'),
+            'pagination': kost,
         }
 
         block_new = IndustriesBlock.objects.create(**block_data)
         data = {
+            'id': str(block_new.id),
             'message': 'New block has been created'
         }
 
@@ -1364,12 +1512,11 @@ class ViewService(View):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class ViewServiceTypeById(View):
+class ViewServiceTypeById(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        put_body = json.loads(request.body)
-        type_id = put_body.get('id')
+    def get(self, request, id):
+        type_id = id
         service_type = ServiceType.objects.get(id=type_id)
         blocks_data = []
         for i in service_type.block.all():
@@ -1404,9 +1551,8 @@ class ViewServiceTypeById(View):
 
         return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        type_id = put_body.get('id')
+    def delete(self, request, id):
+        type_id = id
         service_type = ServiceType.objects.get(id=type_id)
         service_type.delete()
 
@@ -1424,15 +1570,20 @@ class PostServiceType(View):
     def post(self, request):
         put_body = json.loads(request.body)
         service = Services.objects.get(id=1)
-
+        kost = 0
+        for i in service.block.all():
+            if kost < i.pagination:
+                kost = i.pagination
         block_data = {
             'service': service,
-            'title': put_body.get('title')
+            'title': put_body.get('title'),
+            'pagination': kost,
         }
 
         block_new = ServiceType.objects.create(**block_data)
 
         data = {
+            'id': str(block_new.id),
             'message': 'New type has been created'
         }
 
@@ -1443,9 +1594,8 @@ class PostServiceType(View):
 class ViewServiceTypeBlockById(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def get(self, request, id):
+        block_id = id
         block = ServiceTypeBlock.objects.get(id=block_id)
         data = {
             'id': block.id,
@@ -1481,9 +1631,8 @@ class ViewServiceTypeBlockById(APIView):
 
         return JsonResponse(data)
 
-    def delete(self, request):
-        put_body = json.loads(request.body)
-        block_id = put_body.get('id')
+    def delete(self, request, id):
+        block_id = id
         block = ServiceTypeBlock.objects.get(id=block_id)
         block.delete()
 
@@ -1501,6 +1650,12 @@ class PostServiceTypeBlock(APIView):
     def post(self, request):
         put_body = json.loads(request.body)
         images = Images.objects.all()
+        services = Services.objects.all(id=1)
+        kost = 0
+        for i in services.type.all():
+            for j in i.block.all():
+                if kost < j.pagination:
+                    kost = j.pagination
         for i in images:
             print(i.image.public_id)
             if i.image.public_id == put_body.get('image'):
@@ -1513,10 +1668,12 @@ class PostServiceTypeBlock(APIView):
             'content': put_body.get('content'),
             'url': put_body.get('url'),
             'service_type': type,
+            'pagination': kost,
         }
 
         block_new = ServiceTypeBlock.objects.create(**block_data)
         data = {
+            'id': str(block_new.id),
             'message': 'New block has been created'
         }
 

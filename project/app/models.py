@@ -71,6 +71,7 @@ class WhyUsBlock(models.Model):
     title = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     why_us = models.ForeignKey(WhyUs, on_delete=models.SET_NULL, null=True, related_name="block", default="2")
+    pagination = models.IntegerField(null=True, default=0)
 
     def __str__(self):
         return self.title
@@ -87,8 +88,10 @@ class CaseBlock(models.Model):
     title = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     image = CloudinaryField('image', null=True)
+    backgroundImage = CloudinaryField('back_image', null=True)
     content = models.CharField(max_length=255, null=True)
     case = models.ForeignKey(Cases, on_delete=models.SET_NULL, null=True, related_name="block", default="1")
+    pagination = models.IntegerField(null=True, default=0)
 
     def __str__(self):
         return self.title
@@ -104,6 +107,7 @@ class Industries(models.Model):
 class IndustryType(models.Model):
     name = models.CharField(max_length=255)
     industry = models.ForeignKey(Industries, on_delete=models.SET_NULL, null=True, related_name="type", default="1")
+    pagination = models.IntegerField(null=True, default=0)
 
     def __str__(self):
         return self.name
@@ -114,6 +118,7 @@ class IndustriesBlock(models.Model):
     image = CloudinaryField('image', null=True)
     content = models.CharField(max_length=255, null=True)
     industry_type = models.ForeignKey(IndustryType, on_delete=models.SET_NULL, null=True, related_name="block")
+    pagination = models.IntegerField(null=True, default=0)
 
     def __str__(self):
         return self.title
@@ -131,6 +136,7 @@ class CompaniesBlock(models.Model):
     url = models.CharField(max_length=255, null=True)
     image = CloudinaryField('image', null=True)
     company = models.ForeignKey(Companies, on_delete=models.SET_NULL, null=True, related_name="block", default="1")
+    pagination = models.IntegerField(null=True, default=0)
 
     def __str__(self):
         return self.title
@@ -150,6 +156,7 @@ class ClientBlock(models.Model):
     description = models.CharField(max_length=255)
     image = CloudinaryField('image', null=True)
     client = models.ForeignKey(Clients, on_delete=models.SET_NULL, null=True, related_name="block", default="1")
+    pagination = models.IntegerField(null=True, default=0)
 
     def __str__(self):
         return self.title
@@ -166,6 +173,7 @@ class FAQBlock(models.Model):
     title = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     faq = models.ForeignKey(FAQ, on_delete=models.SET_NULL, null=True, related_name="block", default="1")
+    pagination = models.IntegerField(null=True, default=0)
 
     def __str__(self):
         return self.title
@@ -182,8 +190,10 @@ class BlogBlock(models.Model):
     title = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     image = CloudinaryField('image', null=True)
+    backgroundImage = CloudinaryField('image', null=True)
     content = models.CharField(max_length=255, null=True)
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE, null=True, related_name="block", default="1")
+    pagination = models.IntegerField(null=True, default=0)
 
     def __str__(self):
         return self.title
@@ -199,6 +209,7 @@ class Services(models.Model):
 class ServiceType(models.Model):
     title = models.CharField(max_length=255)
     service = models.ForeignKey(Services, on_delete=models.SET_NULL, null=True, related_name="type", default="1")
+    pagination = models.IntegerField(null=True, default=0)
 
     def __str__(self):
         return self.title
@@ -211,6 +222,7 @@ class ServiceTypeBlock(models.Model):
     url = models.CharField(max_length=255, null=True)
     content = models.CharField(max_length=255, null=True)
     service_type = models.ForeignKey(ServiceType, on_delete=models.SET_NULL, null=True, related_name="block")
+    pagination = models.IntegerField(null=True, default=0)
 
     def __str__(self):
         return self.title
